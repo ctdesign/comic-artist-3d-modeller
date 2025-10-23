@@ -15,6 +15,8 @@ export const SceneProvider = ({ children }) => {
   const [gridSize, setGridSize] = useState({ width: 20, depth: 20 });
   const [elements, setElements] = useState([]);
   const [selectedElement, setSelectedElement] = useState(null);
+  const [toolMode, setToolMode] = useState('select'); // 'select', 'wall', 'scale'
+  const [snapToGrid, setSnapToGrid] = useState(true);
   const [cameraSettings, setCameraSettings] = useState({
     fov: 75,
     wireframe: false,
@@ -87,6 +89,30 @@ export const SceneProvider = ({ children }) => {
     setSelectedElement(null);
   }, []);
 
+  const addWall = useCallback((startPos, endPos, height = 2.5) => {
+    const dx = endPos.x - startPos.x;
+    const dz = endPos.z - startPos.z;
+    const length = Math.sqrt(dx * dx + dz * dz);
+
+    if (length < 0.1) return; // Too short, don't create wall
+
+    const angle = Math.atan2(dz, dx);
+    const centerX = (startPos.x + endPos.x) / 2;
+    const centerZ = (startPos.z + endPos.z) / 2;
+
+    const newWall = {
+      id: Date.now() + Math.random(),
+      type: 'wall',
+      position: { x: centerX, y: 0, z: centerZ },
+      rotation: { x: 0, y: angle, z: 0 },
+      scale: { x: 1, y: height / 2.5, z: length / 1 },
+      color: '#cccccc',
+    };
+
+    setElements(prev => [...prev, newWall]);
+    setSelectedElement(newWall.id);
+  }, []);
+
   const value = {
     viewMode,
     setViewMode,
@@ -95,12 +121,17 @@ export const SceneProvider = ({ children }) => {
     elements,
     selectedElement,
     setSelectedElement,
+    toolMode,
+    setToolMode,
+    snapToGrid,
+    setSnapToGrid,
     cameraSettings,
     setCameraSettings,
     addElement,
     updateElement,
     deleteElement,
     duplicateElement,
+    addWall,
     saveScene,
     loadScene,
     clearScene,

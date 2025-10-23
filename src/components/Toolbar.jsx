@@ -13,6 +13,10 @@ function Toolbar() {
     setCameraSettings,
     viewMode,
     clearScene,
+    toolMode,
+    setToolMode,
+    snapToGrid,
+    setSnapToGrid,
   } = useScene();
 
   const selected = elements.find((el) => el.id === selectedElement);
@@ -65,6 +69,56 @@ function Toolbar() {
 
   return (
     <div className="flex-1 p-4 overflow-y-auto">
+      {/* Tool Mode (2D mode only) */}
+      {viewMode === '2d' && (
+        <div className="mb-6">
+          <h3 className="font-semibold mb-2">Tools</h3>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <button
+              onClick={() => setToolMode('select')}
+              className={`px-2 py-2 rounded text-xs ${
+                toolMode === 'select'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Select
+            </button>
+            <button
+              onClick={() => setToolMode('wall')}
+              className={`px-2 py-2 rounded text-xs ${
+                toolMode === 'wall'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Wall
+            </button>
+            <button
+              onClick={() => setToolMode('scale')}
+              className={`px-2 py-2 rounded text-xs ${
+                toolMode === 'scale'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Scale
+            </button>
+          </div>
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={snapToGrid}
+                onChange={(e) => setSnapToGrid(e.target.checked)}
+                className="rounded"
+              />
+              <span className="text-sm">Snap to Grid</span>
+            </label>
+          </div>
+        </div>
+      )}
+
       {/* Grid Settings (2D mode only) */}
       {viewMode === '2d' && (
         <div className="mb-6">

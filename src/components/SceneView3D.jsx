@@ -14,18 +14,18 @@ function Element3D({ element, isSelected, onSelect }) {
   const getGeometry = () => {
     switch (element.type) {
       case ELEMENT_TYPES.PERSON:
-        // Person cutout - a flat card with person shape
+        // Person as thin 2D cutout billboard
         return (
           <group>
-            {/* Body */}
-            <mesh position={[0, size.height / 2, 0]}>
-              <boxGeometry args={[size.width, size.height * 0.6, size.depth]} />
-              <meshStandardMaterial color={element.color} />
-            </mesh>
-            {/* Head */}
+            {/* Head (flattened sphere) */}
             <mesh position={[0, size.height * 0.85, 0]}>
-              <sphereGeometry args={[size.width * 0.6, 16, 16]} />
-              <meshStandardMaterial color={element.color} />
+              <sphereGeometry args={[size.width * 0.5, 16, 16]} />
+              <meshStandardMaterial color={element.color} side={THREE.DoubleSide} />
+            </mesh>
+            {/* Body (very thin box - like a cutout) */}
+            <mesh position={[0, size.height * 0.4, 0]}>
+              <boxGeometry args={[size.width, size.height * 0.6, 0.05]} />
+              <meshStandardMaterial color={element.color} side={THREE.DoubleSide} />
             </mesh>
           </group>
         );
@@ -94,6 +94,30 @@ function Element3D({ element, isSelected, onSelect }) {
         return (
           <mesh position={[0, size.height / 2, 0]}>
             <coneGeometry args={[size.width / 2, size.height, 4]} />
+            <meshStandardMaterial color={element.color} />
+          </mesh>
+        );
+
+      case ELEMENT_TYPES.TREE:
+        return (
+          <group>
+            {/* Trunk */}
+            <mesh position={[0, size.height * 0.2, 0]}>
+              <cylinderGeometry args={[size.width * 0.15, size.width * 0.2, size.height * 0.4, 8]} />
+              <meshStandardMaterial color="#8B4513" />
+            </mesh>
+            {/* Crown (cone foliage) */}
+            <mesh position={[0, size.height * 0.6, 0]}>
+              <coneGeometry args={[size.width * 0.6, size.height * 0.6, 8]} />
+              <meshStandardMaterial color="#228B22" />
+            </mesh>
+          </group>
+        );
+
+      case ELEMENT_TYPES.WALL:
+        return (
+          <mesh position={[0, size.height / 2, 0]}>
+            <boxGeometry args={[size.width, size.height, size.depth]} />
             <meshStandardMaterial color={element.color} />
           </mesh>
         );
@@ -172,12 +196,12 @@ function CameraController() {
       right.crossVectors(camera.up, direction).normalize();
 
       if (keysPressed.current['w']) {
-        controlsRef.current.target.addScaledVector(direction, -speed);
-        camera.position.addScaledVector(direction, -speed);
-      }
-      if (keysPressed.current['s']) {
         controlsRef.current.target.addScaledVector(direction, speed);
         camera.position.addScaledVector(direction, speed);
+      }
+      if (keysPressed.current['s']) {
+        controlsRef.current.target.addScaledVector(direction, -speed);
+        camera.position.addScaledVector(direction, -speed);
       }
       if (keysPressed.current['a']) {
         controlsRef.current.target.addScaledVector(right, speed);
