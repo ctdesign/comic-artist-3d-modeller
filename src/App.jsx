@@ -4,6 +4,7 @@ import SceneBuilder2D from './components/SceneBuilder2D';
 import SceneView3D from './components/SceneView3D';
 import Toolbar from './components/Toolbar';
 import ElementLibrary from './components/ElementLibrary';
+import PropertiesPanel from './components/PropertiesPanel';
 
 function AppContent() {
   const { viewMode, setViewMode, saveScene, loadScene } = useScene();
@@ -59,8 +60,8 @@ function AppContent() {
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar with Element Library and Toolbar */}
-        <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+        {/* Left Sidebar - Tools and Element Library */}
+        <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col overflow-hidden">
           <ElementLibrary />
           <Toolbar />
         </aside>
@@ -69,6 +70,14 @@ function AppContent() {
         <main className="flex-1 relative">
           {viewMode === '2d' ? <SceneBuilder2D /> : <SceneView3D />}
         </main>
+
+        {/* Right Sidebar - Properties Panel */}
+        <aside className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-gray-700">
+            <h2 className="text-lg font-semibold">Properties</h2>
+          </div>
+          <PropertiesPanel />
+        </aside>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Grid } from '@react-three/drei';
 import { useScene } from '../store/SceneContext';
 import { ELEMENT_TYPES, ELEMENT_DEFAULTS } from '../utils/elements';
@@ -254,18 +254,29 @@ function CameraController() {
   return <OrbitControls ref={controlsRef} makeDefault />;
 }
 
+// Component to update camera FOV dynamically
+function CameraFOVUpdater() {
+  const { cameraSettings } = useScene();
+  const { camera } = useThree();
+
+  useEffect(() => {
+    camera.fov = cameraSettings.fov;
+    camera.updateProjectionMatrix();
+  }, [cameraSettings.fov, camera]);
+
+  return null;
+}
+
 // Main 3D Scene
 function Scene() {
   const { elements, selectedElement, setSelectedElement, cameraSettings, gridSize } =
     useScene();
 
-  useEffect(() => {
-    // Apply wireframe to all materials
-    return () => {};
-  }, [cameraSettings.wireframe]);
-
   return (
     <>
+      {/* FOV Updater */}
+      <CameraFOVUpdater />
+
       {/* Lighting */}
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
@@ -321,12 +332,8 @@ function SceneView3D() {
   return (
     <div className="w-full h-full relative">
       <Canvas
-        camera={{ position: [8, 8, 8], fov: cameraSettings.fov }}
+        camera={{ position: [10, 1.6, 10], fov: cameraSettings.fov }}
         shadows
-        onCreated={({ camera }) => {
-          camera.fov = cameraSettings.fov;
-          camera.updateProjectionMatrix();
-        }}
       >
         <Scene />
       </Canvas>

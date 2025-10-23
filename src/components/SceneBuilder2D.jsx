@@ -357,12 +357,21 @@ function SceneBuilder2D() {
       const width = size.width * Math.abs(element.scale.x) * zoom;
       const depth = size.depth * Math.abs(element.scale.z) * zoom;
 
-      // Simple bounding box check (ignoring rotation for click detection simplicity)
+      // Improved hit detection with rotation support
+      // Transform mouse position to element's local coordinate system
+      const dx = mouseX - x;
+      const dz = mouseY - z;
+
+      // Rotate mouse position by inverse of element rotation
+      const cos = Math.cos(-element.rotation.y);
+      const sin = Math.sin(-element.rotation.y);
+      const localX = dx * cos - dz * sin;
+      const localZ = dx * sin + dz * cos;
+
+      // Check if point is inside rotated rectangle
       if (
-        mouseX >= x - width / 2 &&
-        mouseX <= x + width / 2 &&
-        mouseY >= z - depth / 2 &&
-        mouseY <= z + depth / 2
+        Math.abs(localX) <= width / 2 &&
+        Math.abs(localZ) <= depth / 2
       ) {
         clickedElement = element;
         break;
