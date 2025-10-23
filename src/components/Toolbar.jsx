@@ -377,6 +377,22 @@ function Toolbar() {
               className="w-full h-10 bg-gray-700 rounded cursor-pointer"
             />
           </div>
+
+          {/* Material */}
+          <div className="mb-4">
+            <label className="text-xs text-gray-400 block mb-1">Material</label>
+            <select
+              value={selected.material || 'solid'}
+              onChange={(e) =>
+                updateElement(selected.id, { material: e.target.value })
+              }
+              className="w-full bg-gray-700 rounded px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="solid">Solid</option>
+              <option value="reflective">Reflective</option>
+              <option value="transparent">Transparent</option>
+            </select>
+          </div>
         </div>
       ) : (
         <div className="text-sm text-gray-500">

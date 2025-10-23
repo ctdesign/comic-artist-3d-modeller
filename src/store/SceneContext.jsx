@@ -30,6 +30,7 @@ export const SceneProvider = ({ children }) => {
       rotation: { x: 0, y: 0, z: 0 },
       scale: { x: 1, y: 1, z: 1 },
       color: '#888888',
+      material: 'solid', // 'solid', 'reflective', 'transparent'
     };
     setElements(prev => [...prev, newElement]);
     setSelectedElement(newElement.id);
@@ -96,7 +97,8 @@ export const SceneProvider = ({ children }) => {
 
     if (length < 0.1) return; // Too short, don't create wall
 
-    const angle = Math.atan2(dz, dx);
+    // Calculate angle - rotate 90 degrees because wall depth is along Z, but we want length along the drawn line
+    const angle = Math.atan2(dz, dx) - Math.PI / 2;
     const centerX = (startPos.x + endPos.x) / 2;
     const centerZ = (startPos.z + endPos.z) / 2;
 
@@ -107,6 +109,7 @@ export const SceneProvider = ({ children }) => {
       rotation: { x: 0, y: angle, z: 0 },
       scale: { x: 1, y: height / 2.5, z: length / 1 },
       color: '#cccccc',
+      material: 'solid',
     };
 
     setElements(prev => [...prev, newWall]);

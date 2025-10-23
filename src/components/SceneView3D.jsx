@@ -11,6 +11,35 @@ function Element3D({ element, isSelected, onSelect }) {
   const elementInfo = ELEMENT_DEFAULTS[element.type];
   const size = elementInfo.defaultSize;
 
+  // Get material properties based on material type
+  const getMaterialProps = (color) => {
+    const material = element.material || 'solid';
+
+    switch (material) {
+      case 'reflective':
+        return {
+          color: color,
+          metalness: 0.9,
+          roughness: 0.1,
+        };
+      case 'transparent':
+        return {
+          color: color,
+          transparent: true,
+          opacity: 0.4,
+          metalness: 0.1,
+          roughness: 0.1,
+        };
+      case 'solid':
+      default:
+        return {
+          color: color,
+          metalness: 0.2,
+          roughness: 0.8,
+        };
+    }
+  };
+
   const getGeometry = () => {
     switch (element.type) {
       case ELEMENT_TYPES.PERSON:
@@ -20,12 +49,12 @@ function Element3D({ element, isSelected, onSelect }) {
             {/* Head (flattened sphere) */}
             <mesh position={[0, size.height * 0.85, 0]}>
               <sphereGeometry args={[size.width * 0.5, 16, 16]} />
-              <meshStandardMaterial color={element.color} side={THREE.DoubleSide} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} side={THREE.DoubleSide} />
             </mesh>
             {/* Body (very thin box - like a cutout) */}
             <mesh position={[0, size.height * 0.4, 0]}>
               <boxGeometry args={[size.width, size.height * 0.6, 0.05]} />
-              <meshStandardMaterial color={element.color} side={THREE.DoubleSide} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} side={THREE.DoubleSide} />
             </mesh>
           </group>
         );
@@ -36,12 +65,12 @@ function Element3D({ element, isSelected, onSelect }) {
             {/* Seat */}
             <mesh position={[0, size.height * 0.5, 0]}>
               <boxGeometry args={[size.width, size.height * 0.1, size.depth * 0.8]} />
-              <meshStandardMaterial color={element.color} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
             {/* Back */}
             <mesh position={[0, size.height * 0.7, -size.depth * 0.3]}>
               <boxGeometry args={[size.width, size.height * 0.4, size.depth * 0.1]} />
-              <meshStandardMaterial color={element.color} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
             {/* Legs */}
             {[
@@ -52,7 +81,7 @@ function Element3D({ element, isSelected, onSelect }) {
             ].map((pos, i) => (
               <mesh key={i} position={pos}>
                 <cylinderGeometry args={[0.05, 0.05, size.height * 0.5, 8]} />
-                <meshStandardMaterial color={element.color} />
+                <meshStandardMaterial {...getMaterialProps(element.color)} />
               </mesh>
             ))}
           </group>
@@ -64,12 +93,12 @@ function Element3D({ element, isSelected, onSelect }) {
             {/* Mattress */}
             <mesh position={[0, size.height * 0.7, 0]}>
               <boxGeometry args={[size.width, size.height * 0.4, size.depth]} />
-              <meshStandardMaterial color={element.color} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
             {/* Base */}
             <mesh position={[0, size.height * 0.25, 0]}>
               <boxGeometry args={[size.width, size.height * 0.3, size.depth]} />
-              <meshStandardMaterial color={element.color} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
           </group>
         );
@@ -78,7 +107,7 @@ function Element3D({ element, isSelected, onSelect }) {
         return (
           <mesh position={[0, size.height / 2, 0]}>
             <sphereGeometry args={[size.width / 2, 32, 32]} />
-            <meshStandardMaterial color={element.color} />
+            <meshStandardMaterial {...getMaterialProps(element.color)} />
           </mesh>
         );
 
@@ -86,7 +115,7 @@ function Element3D({ element, isSelected, onSelect }) {
         return (
           <mesh position={[0, size.height / 2, 0]}>
             <boxGeometry args={[size.width, size.height, size.depth]} />
-            <meshStandardMaterial color={element.color} />
+            <meshStandardMaterial {...getMaterialProps(element.color)} />
           </mesh>
         );
 
@@ -94,7 +123,7 @@ function Element3D({ element, isSelected, onSelect }) {
         return (
           <mesh position={[0, size.height / 2, 0]}>
             <coneGeometry args={[size.width / 2, size.height, 4]} />
-            <meshStandardMaterial color={element.color} />
+            <meshStandardMaterial {...getMaterialProps(element.color)} />
           </mesh>
         );
 
@@ -104,12 +133,12 @@ function Element3D({ element, isSelected, onSelect }) {
             {/* Trunk */}
             <mesh position={[0, size.height * 0.2, 0]}>
               <cylinderGeometry args={[size.width * 0.15, size.width * 0.2, size.height * 0.4, 8]} />
-              <meshStandardMaterial color="#8B4513" />
+              <meshStandardMaterial {...getMaterialProps('#8B4513')} />
             </mesh>
             {/* Crown (cone foliage) */}
             <mesh position={[0, size.height * 0.6, 0]}>
               <coneGeometry args={[size.width * 0.6, size.height * 0.6, 8]} />
-              <meshStandardMaterial color="#228B22" />
+              <meshStandardMaterial {...getMaterialProps('#228B22')} />
             </mesh>
           </group>
         );
@@ -118,7 +147,7 @@ function Element3D({ element, isSelected, onSelect }) {
         return (
           <mesh position={[0, size.height / 2, 0]}>
             <boxGeometry args={[size.width, size.height, size.depth]} />
-            <meshStandardMaterial color={element.color} />
+            <meshStandardMaterial {...getMaterialProps(element.color)} />
           </mesh>
         );
 
@@ -126,7 +155,7 @@ function Element3D({ element, isSelected, onSelect }) {
         return (
           <mesh position={[0, size.height / 2, 0]}>
             <boxGeometry args={[size.width, size.height, size.depth]} />
-            <meshStandardMaterial color={element.color} />
+            <meshStandardMaterial {...getMaterialProps(element.color)} />
           </mesh>
         );
     }

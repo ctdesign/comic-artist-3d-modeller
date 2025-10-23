@@ -31,6 +31,50 @@ function SceneBuilder2D() {
     return Math.round(value);
   };
 
+  // Arrow key movement
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedElement || toolMode !== 'select') return;
+
+      const element = elements.find((el) => el.id === selectedElement);
+      if (!element) return;
+
+      const moveAmount = snapToGrid ? 1 : 0.1;
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          updateElement(selectedElement, {
+            position: { ...element.position, z: element.position.z - moveAmount },
+          });
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          updateElement(selectedElement, {
+            position: { ...element.position, z: element.position.z + moveAmount },
+          });
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          updateElement(selectedElement, {
+            position: { ...element.position, x: element.position.x - moveAmount },
+          });
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          updateElement(selectedElement, {
+            position: { ...element.position, x: element.position.x + moveAmount },
+          });
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedElement, elements, updateElement, snapToGrid, toolMode]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
