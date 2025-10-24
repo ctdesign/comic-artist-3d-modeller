@@ -408,9 +408,20 @@ function SceneView3D() {
   const containerRef = useRef(null);
 
   const handleCanvasClick = (e) => {
-    // Only activate if clicking directly on the canvas or its wrapper, not from bubbling events
+    // Prevent activation if clicking on any interactive elements or if click bubbled from elsewhere
+    if (e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'BUTTON' ||
+        e.target.tagName === 'SELECT' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.closest('aside') || // Clicking on sidebars
+        e.target.closest('header')) { // Clicking on header
+      return;
+    }
+
+    // Only activate if clicking directly on the canvas or its wrapper
     if (e.target === canvasWrapperRef.current || e.target.tagName === 'CANVAS') {
       if (!isActive) {
+        e.stopPropagation();
         setActivateRequested(true);
       }
     }
@@ -453,8 +464,12 @@ function SceneView3D() {
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             style={{
-              width: panelMask.isCustom ? `${panelMask.width}px` : `${panelMask.width * 100}px`,
-              height: panelMask.isCustom ? `${panelMask.height}px` : `${panelMask.height * 100}px`,
+              width: panelMask.isCustom
+                ? `${panelMask.width * (panelMask.scale || 1)}px`
+                : `${panelMask.width * 100 * (panelMask.scale || 1)}px`,
+              height: panelMask.isCustom
+                ? `${panelMask.height * (panelMask.scale || 1)}px`
+                : `${panelMask.height * 100 * (panelMask.scale || 1)}px`,
               border: '3px solid white',
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, ' + panelMask.opacity + ')',
             }}

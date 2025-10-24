@@ -25,12 +25,14 @@ export const SceneProvider = ({ children }) => {
   const [sceneColors, setSceneColors] = useState({
     floor: '#1f2937',
     sky: '#111827',
+    grid: '#374151',
   });
   const [panelMask, setPanelMask] = useState({
     enabled: false,
     width: 16,
     height: 9,
     opacity: 0.7,
+    scale: 1,
     isCustom: false,
   });
 

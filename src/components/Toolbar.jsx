@@ -140,6 +140,19 @@ function Toolbar() {
               className="w-full h-10 bg-gray-700 rounded cursor-pointer"
             />
           </div>
+          {viewMode === '2d' && (
+            <div>
+              <label className="text-xs text-gray-400">Grid Color</label>
+              <input
+                type="color"
+                value={sceneColors.grid}
+                onChange={(e) =>
+                  setSceneColors({ ...sceneColors, grid: e.target.value })
+                }
+                className="w-full h-10 bg-gray-700 rounded cursor-pointer"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

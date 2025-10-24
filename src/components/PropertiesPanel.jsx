@@ -82,6 +82,25 @@ function PanelWindows() {
         </div>
       </div>
 
+      {/* Panel Scale */}
+      <div className="mb-6 pb-6 border-b border-gray-700">
+        <h4 className="text-sm font-semibold mb-2">Panel Scale</h4>
+        <div className="space-y-2">
+          <label className="text-xs text-gray-400">
+            Scale: {Math.round((panelMask.scale || 1) * 100)}%
+          </label>
+          <input
+            type="range"
+            value={panelMask.scale || 1}
+            onChange={(e) => setPanelMask({ ...panelMask, scale: parseFloat(e.target.value) })}
+            className="w-full"
+            min="0.1"
+            max="3"
+            step="0.1"
+          />
+        </div>
+      </div>
+
       {/* Preset Ratios */}
       <div className="mb-6 pb-6 border-b border-gray-700">
         <h4 className="text-sm font-semibold mb-3">Preset Ratios</h4>

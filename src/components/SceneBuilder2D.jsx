@@ -93,7 +93,7 @@ function SceneBuilder2D() {
     const centerY = canvas.height / 2 + cameraOffset.y;
 
     // Draw grid
-    ctx.strokeStyle = '#374151';
+    ctx.strokeStyle = sceneColors.grid;
     ctx.lineWidth = 1;
 
     // Vertical lines
