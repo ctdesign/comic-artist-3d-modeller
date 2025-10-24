@@ -408,18 +408,8 @@ function SceneView3D() {
   const containerRef = useRef(null);
 
   const handleCanvasClick = (e) => {
-    // Prevent activation if clicking on any interactive elements or if click bubbled from elsewhere
-    if (e.target.tagName === 'INPUT' ||
-        e.target.tagName === 'BUTTON' ||
-        e.target.tagName === 'SELECT' ||
-        e.target.tagName === 'TEXTAREA' ||
-        e.target.closest('aside') || // Clicking on sidebars
-        e.target.closest('header')) { // Clicking on header
-      return;
-    }
-
-    // Only activate if clicking directly on the canvas or its wrapper
-    if (e.target === canvasWrapperRef.current || e.target.tagName === 'CANVAS') {
+    // ONLY activate when clicking directly on the CANVAS element - nothing else
+    if (e.target.tagName === 'CANVAS') {
       if (!isActive) {
         e.stopPropagation();
         setActivateRequested(true);
