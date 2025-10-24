@@ -225,7 +225,7 @@ function Element3D({ element, isSelected, onSelect }) {
 }
 
 // FPS-style camera controller with activation control
-function CameraController({ isActive, setIsActive }) {
+function CameraController({ isActive, setIsActive, activateRequested, setActivateRequested }) {
   const { cameraSettings } = useScene();
   const { camera, gl } = useThree();
   const controlsRef = useRef();
@@ -255,6 +255,7 @@ function CameraController({ isActive, setIsActive }) {
 
     const handleLock = () => {
       setIsActive(true);
+      setActivateRequested(false);
     };
 
     const handleUnlock = () => {
@@ -269,7 +270,14 @@ function CameraController({ isActive, setIsActive }) {
       controls.removeEventListener('lock', handleLock);
       controls.removeEventListener('unlock', handleUnlock);
     };
-  }, [setIsActive]);
+  }, [setIsActive, setActivateRequested]);
+
+  // Trigger pointer lock when activation is requested
+  useEffect(() => {
+    if (activateRequested && controlsRef.current && !isActive) {
+      controlsRef.current.lock();
+    }
+  }, [activateRequested, isActive]);
 
   useFrame(() => {
     if (!controlsRef.current || !isActive) return;
@@ -325,7 +333,7 @@ function CameraFOVUpdater() {
 }
 
 // Main 3D Scene
-function Scene({ isActive, setIsActive }) {
+function Scene({ isActive, setIsActive, activateRequested, setActivateRequested }) {
   const { elements, selectedElement, setSelectedElement, cameraSettings, gridSize } =
     useScene();
 
@@ -378,7 +386,12 @@ function Scene({ isActive, setIsActive }) {
       ))}
 
       {/* Camera Controls */}
-      <CameraController isActive={isActive} setIsActive={setIsActive} />
+      <CameraController
+        isActive={isActive}
+        setIsActive={setIsActive}
+        activateRequested={activateRequested}
+        setActivateRequested={setActivateRequested}
+      />
     </>
   );
 }
@@ -387,10 +400,22 @@ function SceneView3D() {
   const { cameraSettings } = useScene();
   const [isHovered, setIsHovered] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [activateRequested, setActivateRequested] = useState(false);
+  const canvasWrapperRef = useRef(null);
+
+  const handleCanvasClick = (e) => {
+    // Only activate if clicking directly on the canvas or its wrapper, not from bubbling events
+    if (e.target === canvasWrapperRef.current || e.target.tagName === 'CANVAS') {
+      if (!isActive) {
+        setActivateRequested(true);
+      }
+    }
+  };
 
   return (
     <div className="w-full h-full relative">
       <div
+        ref={canvasWrapperRef}
         className="w-full h-full relative transition-all duration-200"
         style={{
           border: isHovered && !isActive ? '3px solid #3b82f6' : '3px solid transparent',
@@ -398,12 +423,18 @@ function SceneView3D() {
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={handleCanvasClick}
       >
         <Canvas
           camera={{ position: [10, 1.6, 10], fov: cameraSettings.fov }}
           shadows
         >
-          <Scene isActive={isActive} setIsActive={setIsActive} />
+          <Scene
+            isActive={isActive}
+            setIsActive={setIsActive}
+            activateRequested={activateRequested}
+            setActivateRequested={setActivateRequested}
+          />
         </Canvas>
       </div>
       <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white pointer-events-none">

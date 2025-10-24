@@ -47,6 +47,11 @@ function PropertiesPanel() {
   };
 
   const handleKeyDown = (e) => {
+    // Prevent arrow keys from propagating to scene when editing
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.stopPropagation();
+    }
+
     if (e.key === 'Enter') {
       applyEdit();
     } else if (e.key === 'Escape') {
@@ -122,12 +127,27 @@ function PropertiesPanel() {
         </button>
       </div>
 
-      {/* Dimensions */}
+      {/* Dimensions - Read-only calculated values */}
       <div className="mb-4 bg-gray-800 rounded p-3">
-        <h4 className="text-sm font-semibold mb-2">Dimensions</h4>
-        <PropertyField label="Width" value={actualWidth} field="width" decimals={2} />
-        <PropertyField label="Height" value={actualHeight} field="height" decimals={2} />
-        <PropertyField label="Depth" value={actualDepth} field="depth" decimals={2} />
+        <h4 className="text-sm font-semibold mb-2">Dimensions (read-only)</h4>
+        <div className="flex items-center justify-between py-1">
+          <span className="text-xs text-gray-400">Width:</span>
+          <span className="text-xs font-mono text-gray-300 px-2 py-1">
+            {actualWidth.toFixed(2)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between py-1">
+          <span className="text-xs text-gray-400">Height:</span>
+          <span className="text-xs font-mono text-gray-300 px-2 py-1">
+            {actualHeight.toFixed(2)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between py-1">
+          <span className="text-xs text-gray-400">Depth:</span>
+          <span className="text-xs font-mono text-gray-300 px-2 py-1">
+            {actualDepth.toFixed(2)}
+          </span>
+        </div>
       </div>
 
       {/* Position */}

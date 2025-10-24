@@ -199,8 +199,8 @@ function SceneBuilder2D() {
 
       ctx.restore();
 
-      // Draw scale handles in scale mode
-      if (toolMode === 'scale' && selectedElement === element.id) {
+      // Draw resize handles when element is selected
+      if (selectedElement === element.id) {
         ctx.save();
         ctx.translate(x, z);
         ctx.rotate(element.rotation.y);
@@ -338,8 +338,8 @@ function SceneBuilder2D() {
     for (let i = elements.length - 1; i >= 0; i--) {
       const element = elements[i];
 
-      // First check if we're clicking a scale handle in scale mode
-      if (toolMode === 'scale' && selectedElement === element.id) {
+      // First check if we're clicking a resize handle when element is selected
+      if (selectedElement === element.id) {
         const handle = getHandleAtPosition(mouseX, mouseY, element);
         if (handle) {
           setScaleHandle(handle);
@@ -400,8 +400,8 @@ function SceneBuilder2D() {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    // Update cursor for scale handles
-    if (toolMode === 'scale' && selectedElement) {
+    // Update cursor for resize handles
+    if (selectedElement) {
       const element = elements.find((el) => el.id === selectedElement);
       if (element) {
         const handle = getHandleAtPosition(mouseX, mouseY, element);
@@ -416,7 +416,7 @@ function SceneBuilder2D() {
           };
           canvas.style.cursor = cursors[handle];
         } else if (!isDragging) {
-          canvas.style.cursor = 'default';
+          canvas.style.cursor = toolMode === 'wall' ? 'crosshair' : 'move';
         }
       }
     } else if (!isDragging) {

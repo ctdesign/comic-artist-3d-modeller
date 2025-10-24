@@ -17,7 +17,7 @@ function Toolbar() {
     <div className="flex-1 p-4 overflow-y-auto">
       {/* Grid Settings (2D mode only) */}
       {viewMode === '2d' && (
-        <div className="mb-6">
+        <div className="mb-6 pb-6 border-b border-gray-700">
           <h3 className="font-semibold mb-2">Grid Settings</h3>
           <div className="space-y-2">
             <div>
@@ -52,7 +52,7 @@ function Toolbar() {
 
       {/* Camera Settings (3D mode only) */}
       {viewMode === '3d' && (
-        <div className="mb-6">
+        <div className="mb-6 pb-6 border-b border-gray-700">
           <h3 className="font-semibold mb-2">Camera Settings</h3>
           <div className="space-y-2">
             <div>
