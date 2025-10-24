@@ -408,7 +408,8 @@ function SceneView3D() {
   const containerRef = useRef(null);
 
   const handleCanvasClick = (e) => {
-    // ONLY activate when clicking directly on the CANVAS element - nothing else
+    // ONLY activate when clicking directly on the CANVAS element
+    // The panel mask overlay blocks clicks outside the window with pointer-events
     if (e.target.tagName === 'CANVAS') {
       if (!isActive) {
         e.stopPropagation();
@@ -443,29 +444,59 @@ function SceneView3D() {
         </Canvas>
       </div>
 
-      {/* Panel Mask Overlay */}
-      {panelMask.enabled && (
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            boxShadow: `inset 0 0 0 ${containerRef.current ? Math.max(containerRef.current.clientWidth, containerRef.current.clientHeight) : 5000}px rgba(0, 0, 0, ${panelMask.opacity})`,
-          }}
-        >
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              width: panelMask.isCustom
-                ? `${panelMask.width * (panelMask.scale || 1)}px`
-                : `${panelMask.width * 100 * (panelMask.scale || 1)}px`,
-              height: panelMask.isCustom
-                ? `${panelMask.height * (panelMask.scale || 1)}px`
-                : `${panelMask.height * 100 * (panelMask.scale || 1)}px`,
-              border: '3px solid white',
-              boxShadow: '0 0 0 9999px rgba(0, 0, 0, ' + panelMask.opacity + ')',
-            }}
-          />
-        </div>
-      )}
+      {/* Panel Mask Overlay - blocks clicks outside window */}
+      {panelMask.enabled && containerRef.current && (() => {
+        const windowWidth = panelMask.isCustom
+          ? panelMask.width * (panelMask.scale || 1)
+          : panelMask.width * 100 * (panelMask.scale || 1);
+        const windowHeight = panelMask.isCustom
+          ? panelMask.height * (panelMask.scale || 1)
+          : panelMask.height * 100 * (panelMask.scale || 1);
+
+        const containerWidth = containerRef.current.clientWidth;
+        const containerHeight = containerRef.current.clientHeight;
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
+
+        const left = centerX - windowWidth / 2;
+        const top = centerY - windowHeight / 2;
+
+        return (
+          <>
+            {/* Overlay with hole cut out using clip-path */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `rgba(0, 0, 0, ${panelMask.opacity})`,
+                clipPath: `polygon(
+                  0 0,
+                  100% 0,
+                  100% 100%,
+                  0 100%,
+                  0 0,
+                  ${left}px ${top}px,
+                  ${left}px ${top + windowHeight}px,
+                  ${left + windowWidth}px ${top + windowHeight}px,
+                  ${left + windowWidth}px ${top}px,
+                  ${left}px ${top}px
+                )`,
+                pointerEvents: 'auto',
+              }}
+            />
+            {/* White border around window */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${windowWidth}px`,
+                height: `${windowHeight}px`,
+                border: '3px solid white',
+              }}
+            />
+          </>
+        );
+      })()}
 
       <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white pointer-events-none">
         <div className="font-semibold mb-1">
