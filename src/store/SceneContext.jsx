@@ -20,6 +20,7 @@ export const SceneProvider = ({ children }) => {
   const [cameraSettings, setCameraSettings] = useState({
     fov: 75,
     wireframe: false,
+    speed: 0.1,
   });
 
   const addElement = useCallback((elementType) => {

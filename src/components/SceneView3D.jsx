@@ -1,8 +1,8 @@
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Grid } from '@react-three/drei';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { PointerLockControls, Grid } from '@react-three/drei';
 import { useScene } from '../store/SceneContext';
 import { ELEMENT_TYPES, ELEMENT_DEFAULTS } from '../utils/elements';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
 // Component for rendering a single element in 3D
@@ -43,18 +43,48 @@ function Element3D({ element, isSelected, onSelect }) {
   const getGeometry = () => {
     switch (element.type) {
       case ELEMENT_TYPES.PERSON:
-        // Person as thin 2D cutout billboard
+        // More realistic person model
         return (
           <group>
-            {/* Head (flattened sphere) */}
-            <mesh position={[0, size.height * 0.85, 0]}>
-              <sphereGeometry args={[size.width * 0.5, 16, 16]} />
-              <meshStandardMaterial {...getMaterialProps(element.color)} side={THREE.DoubleSide} />
+            {/* Head */}
+            <mesh position={[0, size.height * 0.9, 0]}>
+              <sphereGeometry args={[size.width * 0.35, 16, 16]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Body (very thin box - like a cutout) */}
+            {/* Neck */}
+            <mesh position={[0, size.height * 0.82, 0]}>
+              <cylinderGeometry args={[size.width * 0.15, size.width * 0.15, size.height * 0.08, 8]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+            {/* Torso (upper body) */}
+            <mesh position={[0, size.height * 0.6, 0]}>
+              <boxGeometry args={[size.width * 0.9, size.height * 0.35, size.depth * 0.5]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+            {/* Hips/Waist */}
             <mesh position={[0, size.height * 0.4, 0]}>
-              <boxGeometry args={[size.width, size.height * 0.6, 0.05]} />
-              <meshStandardMaterial {...getMaterialProps(element.color)} side={THREE.DoubleSide} />
+              <boxGeometry args={[size.width * 0.85, size.height * 0.15, size.depth * 0.45]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+            {/* Left Leg */}
+            <mesh position={[-size.width * 0.2, size.height * 0.2, 0]}>
+              <cylinderGeometry args={[size.width * 0.15, size.width * 0.15, size.height * 0.4, 8]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+            {/* Right Leg */}
+            <mesh position={[size.width * 0.2, size.height * 0.2, 0]}>
+              <cylinderGeometry args={[size.width * 0.15, size.width * 0.15, size.height * 0.4, 8]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+            {/* Left Arm */}
+            <mesh position={[-size.width * 0.55, size.height * 0.6, 0]} rotation={[0, 0, Math.PI / 6]}>
+              <cylinderGeometry args={[size.width * 0.12, size.width * 0.12, size.height * 0.35, 8]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+            {/* Right Arm */}
+            <mesh position={[size.width * 0.55, size.height * 0.6, 0]} rotation={[0, 0, -Math.PI / 6]}>
+              <cylinderGeometry args={[size.width * 0.12, size.width * 0.12, size.height * 0.35, 8]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
           </group>
         );
@@ -194,10 +224,13 @@ function Element3D({ element, isSelected, onSelect }) {
   );
 }
 
-// Camera controller for WASD movement
+// FPS-style camera controller
 function CameraController() {
+  const { cameraSettings } = useScene();
+  const { camera } = useThree();
   const controlsRef = useRef();
   const keysPressed = useRef({});
+  const moveSpeed = cameraSettings.speed || 0.1;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -211,47 +244,50 @@ function CameraController() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    const interval = setInterval(() => {
-      if (!controlsRef.current) return;
-
-      const speed = 0.1;
-      const camera = controlsRef.current.object;
-      const direction = new THREE.Vector3();
-      camera.getWorldDirection(direction);
-      direction.y = 0;
-      direction.normalize();
-
-      const right = new THREE.Vector3();
-      right.crossVectors(camera.up, direction).normalize();
-
-      if (keysPressed.current['w']) {
-        controlsRef.current.target.addScaledVector(direction, speed);
-        camera.position.addScaledVector(direction, speed);
-      }
-      if (keysPressed.current['s']) {
-        controlsRef.current.target.addScaledVector(direction, -speed);
-        camera.position.addScaledVector(direction, -speed);
-      }
-      if (keysPressed.current['a']) {
-        controlsRef.current.target.addScaledVector(right, speed);
-        camera.position.addScaledVector(right, speed);
-      }
-      if (keysPressed.current['d']) {
-        controlsRef.current.target.addScaledVector(right, -speed);
-        camera.position.addScaledVector(right, -speed);
-      }
-
-      controlsRef.current.update();
-    }, 16);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      clearInterval(interval);
     };
   }, []);
 
-  return <OrbitControls ref={controlsRef} makeDefault />;
+  useFrame(() => {
+    if (!controlsRef.current) return;
+
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+
+    // Forward/backward direction (maintain horizontal movement)
+    const forward = direction.clone();
+    forward.y = 0;
+    forward.normalize();
+
+    // Right direction
+    const right = new THREE.Vector3();
+    right.crossVectors(camera.up, forward).normalize();
+
+    // Movement
+    if (keysPressed.current['w']) {
+      camera.position.addScaledVector(forward, moveSpeed);
+    }
+    if (keysPressed.current['s']) {
+      camera.position.addScaledVector(forward, -moveSpeed);
+    }
+    if (keysPressed.current['a']) {
+      camera.position.addScaledVector(right, moveSpeed);
+    }
+    if (keysPressed.current['d']) {
+      camera.position.addScaledVector(right, -moveSpeed);
+    }
+    // Vertical movement
+    if (keysPressed.current['e']) {
+      camera.position.y += moveSpeed;
+    }
+    if (keysPressed.current['q']) {
+      camera.position.y -= moveSpeed;
+    }
+  });
+
+  return <PointerLockControls ref={controlsRef} />;
 }
 
 // Component to update camera FOV dynamically
@@ -339,10 +375,11 @@ function SceneView3D() {
       </Canvas>
       <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white">
         <div className="font-semibold mb-1">Controls:</div>
-        <div>WASD: Move camera</div>
-        <div>Mouse: Rotate view</div>
-        <div>Scroll: Zoom</div>
-        <div>Click: Select element</div>
+        <div>Click canvas to activate</div>
+        <div>WASD: Move horizontally</div>
+        <div>E/Q: Move up/down</div>
+        <div>Mouse: Look around</div>
+        <div>ESC: Release mouse</div>
       </div>
     </div>
   );
