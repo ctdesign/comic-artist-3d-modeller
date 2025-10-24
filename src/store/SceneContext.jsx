@@ -22,6 +22,17 @@ export const SceneProvider = ({ children }) => {
     wireframe: false,
     speed: 0.1,
   });
+  const [sceneColors, setSceneColors] = useState({
+    floor: '#1f2937',
+    sky: '#111827',
+  });
+  const [panelMask, setPanelMask] = useState({
+    enabled: false,
+    width: 16,
+    height: 9,
+    opacity: 0.7,
+    isCustom: false,
+  });
 
   const addElement = useCallback((elementType) => {
     const newElement = {
@@ -145,6 +156,10 @@ export const SceneProvider = ({ children }) => {
     setSnapToGrid,
     cameraSettings,
     setCameraSettings,
+    sceneColors,
+    setSceneColors,
+    panelMask,
+    setPanelMask,
     addElement,
     updateElement,
     deleteElement,

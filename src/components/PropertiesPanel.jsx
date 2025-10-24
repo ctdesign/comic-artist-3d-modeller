@@ -2,7 +2,149 @@ import { useState } from 'react';
 import { useScene } from '../store/SceneContext';
 import { ELEMENT_DEFAULTS } from '../utils/elements';
 
-function PropertiesPanel() {
+// Common comic book panel ratios
+const PANEL_RATIOS = [
+  { name: 'Square', ratio: '1:1', width: 1, height: 1 },
+  { name: 'Landscape 3:2', ratio: '3:2', width: 3, height: 2 },
+  { name: 'Landscape 16:9', ratio: '16:9', width: 16, height: 9 },
+  { name: 'Landscape 2:1', ratio: '2:1', width: 2, height: 1 },
+  { name: 'Portrait 2:3', ratio: '2:3', width: 2, height: 3 },
+  { name: 'Portrait 3:4', ratio: '3:4', width: 3, height: 4 },
+  { name: 'Portrait 9:16', ratio: '9:16', width: 9, height: 16 },
+  { name: 'Widescreen 21:9', ratio: '21:9', width: 21, height: 9 },
+  { name: 'Vertical Strip 1:3', ratio: '1:3', width: 1, height: 3 },
+  { name: 'Horizontal Strip 4:1', ratio: '4:1', width: 4, height: 1 },
+];
+
+function PanelWindows() {
+  const { panelMask, setPanelMask } = useScene();
+  const [customWidth, setCustomWidth] = useState(800);
+  const [customHeight, setCustomHeight] = useState(600);
+
+  const handlePresetSelect = (preset) => {
+    setPanelMask({
+      ...panelMask,
+      enabled: true,
+      width: preset.width,
+      height: preset.height,
+      isCustom: false,
+    });
+  };
+
+  const handleCustomApply = () => {
+    setPanelMask({
+      ...panelMask,
+      enabled: true,
+      width: customWidth,
+      height: customHeight,
+      isCustom: true,
+    });
+  };
+
+  const handleOpacityChange = (e) => {
+    setPanelMask({
+      ...panelMask,
+      opacity: parseFloat(e.target.value),
+    });
+  };
+
+  return (
+    <div className="flex-1 p-4 overflow-y-auto">
+      {/* Enable/Disable Toggle */}
+      <div className="mb-6">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={panelMask.enabled}
+            onChange={(e) => setPanelMask({ ...panelMask, enabled: e.target.checked })}
+            className="rounded"
+          />
+          <span className="text-sm font-semibold">Enable Panel Mask</span>
+        </label>
+      </div>
+
+      {/* Mask Opacity */}
+      <div className="mb-6 pb-6 border-b border-gray-700">
+        <h4 className="text-sm font-semibold mb-2">Mask Opacity</h4>
+        <div className="space-y-2">
+          <label className="text-xs text-gray-400">
+            Opacity: {Math.round(panelMask.opacity * 100)}%
+          </label>
+          <input
+            type="range"
+            value={panelMask.opacity}
+            onChange={handleOpacityChange}
+            className="w-full"
+            min="0"
+            max="1"
+            step="0.05"
+          />
+        </div>
+      </div>
+
+      {/* Preset Ratios */}
+      <div className="mb-6 pb-6 border-b border-gray-700">
+        <h4 className="text-sm font-semibold mb-3">Preset Ratios</h4>
+        <div className="space-y-2">
+          {PANEL_RATIOS.map((preset) => (
+            <button
+              key={preset.name}
+              onClick={() => handlePresetSelect(preset)}
+              className={`w-full px-3 py-2 rounded text-sm text-left transition-colors ${
+                panelMask.enabled &&
+                !panelMask.isCustom &&
+                panelMask.width === preset.width &&
+                panelMask.height === preset.height
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              }`}
+            >
+              <div className="font-medium">{preset.name}</div>
+              <div className="text-xs opacity-75">{preset.ratio}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom Size */}
+      <div className="mb-4">
+        <h4 className="text-sm font-semibold mb-3">Custom Size</h4>
+        <div className="space-y-2">
+          <div>
+            <label className="text-xs text-gray-400">Width (px)</label>
+            <input
+              type="number"
+              value={customWidth}
+              onChange={(e) => setCustomWidth(parseInt(e.target.value))}
+              className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
+              min="100"
+              max="4000"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400">Height (px)</label>
+            <input
+              type="number"
+              value={customHeight}
+              onChange={(e) => setCustomHeight(parseInt(e.target.value))}
+              className="w-full bg-gray-700 rounded px-2 py-1 text-sm"
+              min="100"
+              max="4000"
+            />
+          </div>
+          <button
+            onClick={handleCustomApply}
+            className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm"
+          >
+            Apply Custom Size
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PropertiesPanel({ viewMode }) {
   const {
     selectedElement,
     elements,
@@ -58,6 +200,11 @@ function PropertiesPanel() {
       setEditingField(null);
     }
   };
+
+  // In 3D view, show Panel Windows instead of properties
+  if (viewMode === '3d') {
+    return <PanelWindows />;
+  }
 
   if (!selected) {
     return (

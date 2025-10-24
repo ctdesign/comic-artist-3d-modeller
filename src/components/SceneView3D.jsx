@@ -334,13 +334,16 @@ function CameraFOVUpdater() {
 
 // Main 3D Scene
 function Scene({ isActive, setIsActive, activateRequested, setActivateRequested }) {
-  const { elements, selectedElement, setSelectedElement, cameraSettings, gridSize } =
+  const { elements, selectedElement, setSelectedElement, cameraSettings, gridSize, sceneColors } =
     useScene();
 
   return (
     <>
       {/* FOV Updater */}
       <CameraFOVUpdater />
+
+      {/* Sky Color */}
+      <color attach="background" args={[sceneColors.sky]} />
 
       {/* Lighting */}
       <ambientLight intensity={0.5} />
@@ -366,7 +369,7 @@ function Scene({ isActive, setIsActive, activateRequested, setActivateRequested 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
         <planeGeometry args={[gridSize.width, gridSize.depth]} />
         <meshStandardMaterial
-          color="#1f2937"
+          color={sceneColors.floor}
           wireframe={cameraSettings.wireframe}
         />
       </mesh>
@@ -397,11 +400,12 @@ function Scene({ isActive, setIsActive, activateRequested, setActivateRequested 
 }
 
 function SceneView3D() {
-  const { cameraSettings } = useScene();
+  const { cameraSettings, panelMask } = useScene();
   const [isHovered, setIsHovered] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [activateRequested, setActivateRequested] = useState(false);
   const canvasWrapperRef = useRef(null);
+  const containerRef = useRef(null);
 
   const handleCanvasClick = (e) => {
     // Only activate if clicking directly on the canvas or its wrapper, not from bubbling events
@@ -413,7 +417,7 @@ function SceneView3D() {
   };
 
   return (
-    <div className="w-full h-full relative">
+    <div ref={containerRef} className="w-full h-full relative">
       <div
         ref={canvasWrapperRef}
         className="w-full h-full relative transition-all duration-200"
@@ -437,6 +441,27 @@ function SceneView3D() {
           />
         </Canvas>
       </div>
+
+      {/* Panel Mask Overlay */}
+      {panelMask.enabled && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            boxShadow: `inset 0 0 0 ${containerRef.current ? Math.max(containerRef.current.clientWidth, containerRef.current.clientHeight) : 5000}px rgba(0, 0, 0, ${panelMask.opacity})`,
+          }}
+        >
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              width: panelMask.isCustom ? `${panelMask.width}px` : `${panelMask.width * 100}px`,
+              height: panelMask.isCustom ? `${panelMask.height}px` : `${panelMask.height * 100}px`,
+              border: '3px solid white',
+              boxShadow: '0 0 0 9999px rgba(0, 0, 0, ' + panelMask.opacity + ')',
+            }}
+          />
+        </div>
+      )}
+
       <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white pointer-events-none">
         <div className="font-semibold mb-1">
           Controls: <span className={isActive ? 'text-green-400' : 'text-gray-400'}>

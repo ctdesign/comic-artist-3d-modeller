@@ -6,6 +6,8 @@ function Toolbar() {
     setGridSize,
     cameraSettings,
     setCameraSettings,
+    sceneColors,
+    setSceneColors,
     viewMode,
     toolMode,
     setToolMode,
@@ -111,6 +113,35 @@ function Toolbar() {
           </div>
         </div>
       )}
+
+      {/* Scene Colors */}
+      <div className="mb-6">
+        <h3 className="font-semibold mb-2">Scene Colors</h3>
+        <div className="space-y-2">
+          <div>
+            <label className="text-xs text-gray-400">Floor Color</label>
+            <input
+              type="color"
+              value={sceneColors.floor}
+              onChange={(e) =>
+                setSceneColors({ ...sceneColors, floor: e.target.value })
+              }
+              className="w-full h-10 bg-gray-700 rounded cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400">Sky Color</label>
+            <input
+              type="color"
+              value={sceneColors.sky}
+              onChange={(e) =>
+                setSceneColors({ ...sceneColors, sky: e.target.value })
+              }
+              className="w-full h-10 bg-gray-700 rounded cursor-pointer"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -13,6 +13,7 @@ function SceneBuilder2D() {
     toolMode,
     snapToGrid,
     addWall,
+    sceneColors,
   } = useScene();
 
   const [isDragging, setIsDragging] = useState(false);
@@ -84,8 +85,8 @@ function SceneBuilder2D() {
     canvas.width = rect.width;
     canvas.height = rect.height;
 
-    // Clear canvas
-    ctx.fillStyle = '#1f2937';
+    // Clear canvas with floor color
+    ctx.fillStyle = sceneColors.floor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const centerX = canvas.width / 2 + cameraOffset.x;
@@ -247,7 +248,7 @@ function SceneBuilder2D() {
     if (toolMode === 'scale' && selectedElement) {
       ctx.fillText(`Scale Mode: ${scaleMode} (Hold Shift to ${scaleMode === 'uniform' ? 'skew' : 'uniform'})`, 10, 80);
     }
-  }, [elements, selectedElement, gridSize, cameraOffset, zoom, wallPreview, toolMode, scaleMode, hoverHandle]);
+  }, [elements, selectedElement, gridSize, cameraOffset, zoom, wallPreview, toolMode, scaleMode, hoverHandle, sceneColors]);
 
   const screenToWorld = (screenX, screenY) => {
     const canvas = canvasRef.current;

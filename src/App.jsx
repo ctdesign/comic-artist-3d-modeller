@@ -136,7 +136,8 @@ function AppContent() {
         {/* Left Sidebar - Tools and Element Library */}
         {leftPanelOpen && (
           <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col overflow-hidden">
-            <ElementLibrary />
+            {/* Element Library only shown in 2D view */}
+            {viewMode === '2d' && <ElementLibrary />}
             <Toolbar />
           </aside>
         )}
@@ -166,13 +167,15 @@ function AppContent() {
           {rightPanelOpen ? '▶' : '◀'}
         </button>
 
-        {/* Right Sidebar - Properties Panel */}
+        {/* Right Sidebar - Properties Panel or Panel Windows */}
         {rightPanelOpen && (
           <aside className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden">
             <div className="p-4 border-b border-gray-700">
-              <h2 className="text-lg font-semibold">Properties</h2>
+              <h2 className="text-lg font-semibold">
+                {viewMode === '2d' ? 'Properties' : 'Panel Windows'}
+              </h2>
             </div>
-            <PropertiesPanel />
+            <PropertiesPanel viewMode={viewMode} />
           </aside>
         )}
       </div>
