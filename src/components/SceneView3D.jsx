@@ -224,10 +224,10 @@ function Element3D({ element, isSelected, onSelect }) {
   );
 }
 
-// FPS-style camera controller
-function CameraController() {
+// FPS-style camera controller with activation control
+function CameraController({ isActive, setIsActive }) {
   const { cameraSettings } = useScene();
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const controlsRef = useRef();
   const keysPressed = useRef({});
   const moveSpeed = cameraSettings.speed || 0.1;
@@ -250,8 +250,29 @@ function CameraController() {
     };
   }, []);
 
-  useFrame(() => {
+  useEffect(() => {
     if (!controlsRef.current) return;
+
+    const handleLock = () => {
+      setIsActive(true);
+    };
+
+    const handleUnlock = () => {
+      setIsActive(false);
+    };
+
+    const controls = controlsRef.current;
+    controls.addEventListener('lock', handleLock);
+    controls.addEventListener('unlock', handleUnlock);
+
+    return () => {
+      controls.removeEventListener('lock', handleLock);
+      controls.removeEventListener('unlock', handleUnlock);
+    };
+  }, [setIsActive]);
+
+  useFrame(() => {
+    if (!controlsRef.current || !isActive) return;
 
     const direction = new THREE.Vector3();
     camera.getWorldDirection(direction);
@@ -265,7 +286,7 @@ function CameraController() {
     const right = new THREE.Vector3();
     right.crossVectors(camera.up, forward).normalize();
 
-    // Movement
+    // Movement - only when active
     if (keysPressed.current['w']) {
       camera.position.addScaledVector(forward, moveSpeed);
     }
@@ -304,7 +325,7 @@ function CameraFOVUpdater() {
 }
 
 // Main 3D Scene
-function Scene() {
+function Scene({ isActive, setIsActive }) {
   const { elements, selectedElement, setSelectedElement, cameraSettings, gridSize } =
     useScene();
 
@@ -357,24 +378,40 @@ function Scene() {
       ))}
 
       {/* Camera Controls */}
-      <CameraController />
+      <CameraController isActive={isActive} setIsActive={setIsActive} />
     </>
   );
 }
 
 function SceneView3D() {
   const { cameraSettings } = useScene();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   return (
     <div className="w-full h-full relative">
-      <Canvas
-        camera={{ position: [10, 1.6, 10], fov: cameraSettings.fov }}
-        shadows
+      <div
+        className="w-full h-full relative transition-all duration-200"
+        style={{
+          border: isHovered && !isActive ? '3px solid #3b82f6' : '3px solid transparent',
+          boxShadow: isHovered && !isActive ? '0 0 20px rgba(59, 130, 246, 0.5)' : 'none',
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <Scene />
-      </Canvas>
-      <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white">
-        <div className="font-semibold mb-1">Controls:</div>
+        <Canvas
+          camera={{ position: [10, 1.6, 10], fov: cameraSettings.fov }}
+          shadows
+        >
+          <Scene isActive={isActive} setIsActive={setIsActive} />
+        </Canvas>
+      </div>
+      <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white pointer-events-none">
+        <div className="font-semibold mb-1">
+          Controls: <span className={isActive ? 'text-green-400' : 'text-gray-400'}>
+            {isActive ? 'ACTIVE' : 'INACTIVE'}
+          </span>
+        </div>
         <div>Click canvas to activate</div>
         <div>WASD: Move horizontally</div>
         <div>E/Q: Move up/down</div>

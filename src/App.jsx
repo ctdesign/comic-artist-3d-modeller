@@ -19,6 +19,9 @@ function AppContent() {
     clearScene,
   } = useScene();
 
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+
   return (
     <div className="w-full h-full flex flex-col bg-gray-900 text-white">
       {/* Header */}
@@ -129,25 +132,49 @@ function AppContent() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Left Sidebar - Tools and Element Library */}
-        <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col overflow-hidden">
-          <ElementLibrary />
-          <Toolbar />
-        </aside>
+        {leftPanelOpen && (
+          <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col overflow-hidden">
+            <ElementLibrary />
+            <Toolbar />
+          </aside>
+        )}
+
+        {/* Left Panel Toggle Button */}
+        <button
+          onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-r"
+          style={{ left: leftPanelOpen ? '256px' : '0' }}
+          title={leftPanelOpen ? 'Hide left panel' : 'Show left panel'}
+        >
+          {leftPanelOpen ? '◀' : '▶'}
+        </button>
 
         {/* Main View Area */}
         <main className="flex-1 relative">
           {viewMode === '2d' ? <SceneBuilder2D /> : <SceneView3D />}
         </main>
 
+        {/* Right Panel Toggle Button */}
+        <button
+          onClick={() => setRightPanelOpen(!rightPanelOpen)}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-l"
+          style={{ right: rightPanelOpen ? '320px' : '0' }}
+          title={rightPanelOpen ? 'Hide right panel' : 'Show right panel'}
+        >
+          {rightPanelOpen ? '▶' : '◀'}
+        </button>
+
         {/* Right Sidebar - Properties Panel */}
-        <aside className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-gray-700">
-            <h2 className="text-lg font-semibold">Properties</h2>
-          </div>
-          <PropertiesPanel />
-        </aside>
+        {rightPanelOpen && (
+          <aside className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-gray-700">
+              <h2 className="text-lg font-semibold">Properties</h2>
+            </div>
+            <PropertiesPanel />
+          </aside>
+        )}
       </div>
     </div>
   );

@@ -68,21 +68,35 @@ export const SceneProvider = ({ children }) => {
   }, [elements]);
 
   const saveScene = useCallback(() => {
-    const scene = {
-      elements,
-      gridSize,
-      cameraSettings,
-    };
-    localStorage.setItem('artAssistantScene', JSON.stringify(scene));
+    try {
+      const scene = {
+        elements,
+        gridSize,
+        cameraSettings,
+      };
+      localStorage.setItem('artAssistantScene', JSON.stringify(scene));
+      alert('Scene saved successfully!');
+    } catch (error) {
+      console.error('Error saving scene:', error);
+      alert('Error saving scene. Please try again.');
+    }
   }, [elements, gridSize, cameraSettings]);
 
   const loadScene = useCallback(() => {
-    const saved = localStorage.getItem('artAssistantScene');
-    if (saved) {
-      const scene = JSON.parse(saved);
-      setElements(scene.elements || []);
-      setGridSize(scene.gridSize || { width: 20, depth: 20 });
-      setCameraSettings(scene.cameraSettings || { fov: 75, wireframe: false });
+    try {
+      const saved = localStorage.getItem('artAssistantScene');
+      if (saved) {
+        const scene = JSON.parse(saved);
+        setElements(scene.elements || []);
+        setGridSize(scene.gridSize || { width: 20, depth: 20 });
+        setCameraSettings(scene.cameraSettings || { fov: 75, wireframe: false, speed: 0.1 });
+        alert('Scene loaded successfully!');
+      } else {
+        alert('No saved scene found.');
+      }
+    } catch (error) {
+      console.error('Error loading scene:', error);
+      alert('Error loading scene. The saved data may be corrupted.');
     }
   }, []);
 
