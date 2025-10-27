@@ -13,6 +13,7 @@ function Toolbar() {
     setToolMode,
     snapToGrid,
     setSnapToGrid,
+    requestWalkMode,
   } = useScene();
 
   return (
@@ -57,6 +58,12 @@ function Toolbar() {
         <div className="mb-6 pb-6 border-b border-gray-700">
           <h3 className="font-semibold mb-2">Camera Settings</h3>
           <div className="space-y-2">
+            <button
+              onClick={requestWalkMode}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-semibold"
+            >
+              Activate Walk Mode
+            </button>
             <div>
               <label className="text-xs text-gray-400">
                 Focal Length (FOV: {cameraSettings.fov}°)
