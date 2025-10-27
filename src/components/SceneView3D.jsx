@@ -407,14 +407,10 @@ function SceneView3D() {
   const canvasWrapperRef = useRef(null);
   const containerRef = useRef(null);
 
-  const handleCanvasClick = (e) => {
-    // ONLY activate when clicking directly on the CANVAS element
-    // The panel mask overlay blocks clicks outside the window with pointer-events
-    if (e.target.tagName === 'CANVAS') {
-      if (!isActive) {
-        e.stopPropagation();
-        setActivateRequested(true);
-      }
+  // Handle activation - only when clicking canvas background (not on 3D objects)
+  const handleCanvasBackgroundClick = () => {
+    if (!isActive) {
+      setActivateRequested(true);
     }
   };
 
@@ -429,11 +425,11 @@ function SceneView3D() {
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={handleCanvasClick}
       >
         <Canvas
           camera={{ position: [10, 1.6, 10], fov: cameraSettings.fov }}
           shadows
+          onPointerMissed={handleCanvasBackgroundClick}
         >
           <Scene
             isActive={isActive}
@@ -460,27 +456,58 @@ function SceneView3D() {
 
         const left = centerX - windowWidth / 2;
         const top = centerY - windowHeight / 2;
+        const right = left + windowWidth;
+        const bottom = top + windowHeight;
+
+        const overlayStyle = {
+          background: `rgba(0, 0, 0, ${panelMask.opacity})`,
+          pointerEvents: 'auto',
+        };
 
         return (
           <>
-            {/* Overlay with hole cut out using clip-path */}
+            {/* Top overlay */}
             <div
-              className="absolute inset-0"
+              className="absolute"
               style={{
-                background: `rgba(0, 0, 0, ${panelMask.opacity})`,
-                clipPath: `polygon(
-                  0 0,
-                  100% 0,
-                  100% 100%,
-                  0 100%,
-                  0 0,
-                  ${left}px ${top}px,
-                  ${left}px ${top + windowHeight}px,
-                  ${left + windowWidth}px ${top + windowHeight}px,
-                  ${left + windowWidth}px ${top}px,
-                  ${left}px ${top}px
-                )`,
-                pointerEvents: 'auto',
+                ...overlayStyle,
+                left: 0,
+                top: 0,
+                right: 0,
+                height: `${top}px`,
+              }}
+            />
+            {/* Bottom overlay */}
+            <div
+              className="absolute"
+              style={{
+                ...overlayStyle,
+                left: 0,
+                top: `${bottom}px`,
+                right: 0,
+                bottom: 0,
+              }}
+            />
+            {/* Left overlay */}
+            <div
+              className="absolute"
+              style={{
+                ...overlayStyle,
+                left: 0,
+                top: `${top}px`,
+                width: `${left}px`,
+                height: `${windowHeight}px`,
+              }}
+            />
+            {/* Right overlay */}
+            <div
+              className="absolute"
+              style={{
+                ...overlayStyle,
+                left: `${right}px`,
+                top: `${top}px`,
+                right: 0,
+                height: `${windowHeight}px`,
               }}
             />
             {/* White border around window */}
