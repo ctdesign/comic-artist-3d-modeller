@@ -316,7 +316,9 @@ function CameraController({ isActive, setIsActive, activateRequested, clearActiv
     }
   });
 
-  return <PointerLockControls ref={controlsRef} />;
+  // Use selector="#no-auto-lock" to prevent default click-to-lock behavior
+  // We only want to lock when the button is clicked, not when canvas is clicked
+  return <PointerLockControls ref={controlsRef} selector="#no-auto-lock" />;
 }
 
 // Component to update camera FOV dynamically
