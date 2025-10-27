@@ -225,7 +225,7 @@ function Element3D({ element, isSelected, onSelect }) {
 }
 
 // FPS-style camera controller with activation control
-function CameraController({ isActive, setIsActive, activateRequested, setActivateRequested }) {
+function CameraController({ isActive, setIsActive, activateRequested, clearActivateRequest }) {
   const { cameraSettings } = useScene();
   const { camera, gl } = useThree();
   const controlsRef = useRef();
@@ -255,7 +255,7 @@ function CameraController({ isActive, setIsActive, activateRequested, setActivat
 
     const handleLock = () => {
       setIsActive(true);
-      setActivateRequested(false);
+      clearActivateRequest();
     };
 
     const handleUnlock = () => {
@@ -270,7 +270,7 @@ function CameraController({ isActive, setIsActive, activateRequested, setActivat
       controls.removeEventListener('lock', handleLock);
       controls.removeEventListener('unlock', handleUnlock);
     };
-  }, [setIsActive, setActivateRequested]);
+  }, [setIsActive, clearActivateRequest]);
 
   // Trigger pointer lock when activation is requested
   useEffect(() => {
@@ -333,7 +333,7 @@ function CameraFOVUpdater() {
 }
 
 // Main 3D Scene
-function Scene({ isActive, setIsActive, activateRequested, setActivateRequested }) {
+function Scene({ isActive, setIsActive, activateRequested, clearActivateRequest }) {
   const { elements, selectedElement, setSelectedElement, cameraSettings, gridSize, sceneColors } =
     useScene();
 
@@ -393,49 +393,33 @@ function Scene({ isActive, setIsActive, activateRequested, setActivateRequested 
         isActive={isActive}
         setIsActive={setIsActive}
         activateRequested={activateRequested}
-        setActivateRequested={setActivateRequested}
+        clearActivateRequest={clearActivateRequest}
       />
     </>
   );
 }
 
 function SceneView3D() {
-  const { cameraSettings, panelMask } = useScene();
-  const [isHovered, setIsHovered] = useState(false);
+  const { cameraSettings, panelMask, walkModeRequested, clearWalkModeRequest } = useScene();
   const [isActive, setIsActive] = useState(false);
-  const [activateRequested, setActivateRequested] = useState(false);
   const canvasWrapperRef = useRef(null);
   const containerRef = useRef(null);
-
-  // Handle activation - only when clicking canvas background (not on 3D objects)
-  const handleCanvasBackgroundClick = () => {
-    if (!isActive) {
-      setActivateRequested(true);
-    }
-  };
 
   return (
     <div ref={containerRef} className="w-full h-full relative">
       <div
         ref={canvasWrapperRef}
-        className="w-full h-full relative transition-all duration-200"
-        style={{
-          border: isHovered && !isActive ? '3px solid #3b82f6' : '3px solid transparent',
-          boxShadow: isHovered && !isActive ? '0 0 20px rgba(59, 130, 246, 0.5)' : 'none',
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className="w-full h-full relative"
       >
         <Canvas
           camera={{ position: [10, 1.6, 10], fov: cameraSettings.fov }}
           shadows
-          onPointerMissed={handleCanvasBackgroundClick}
         >
           <Scene
             isActive={isActive}
             setIsActive={setIsActive}
-            activateRequested={activateRequested}
-            setActivateRequested={setActivateRequested}
+            activateRequested={walkModeRequested}
+            clearActivateRequest={clearWalkModeRequest}
           />
         </Canvas>
       </div>
@@ -527,15 +511,15 @@ function SceneView3D() {
 
       <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded text-sm text-white pointer-events-none">
         <div className="font-semibold mb-1">
-          Controls: <span className={isActive ? 'text-green-400' : 'text-gray-400'}>
+          Walk Mode: <span className={isActive ? 'text-green-400' : 'text-gray-400'}>
             {isActive ? 'ACTIVE' : 'INACTIVE'}
           </span>
         </div>
-        <div>Click canvas to activate</div>
+        <div className="text-xs text-gray-400 mt-2">Use button in toolbar to activate</div>
         <div>WASD: Move horizontally</div>
         <div>E/Q: Move up/down</div>
         <div>Mouse: Look around</div>
-        <div>ESC: Release mouse</div>
+        <div>ESC: Deactivate</div>
       </div>
     </div>
   );

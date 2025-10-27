@@ -35,6 +35,15 @@ export const SceneProvider = ({ children }) => {
     scale: 1,
     isCustom: false,
   });
+  const [walkModeRequested, setWalkModeRequested] = useState(false);
+
+  const requestWalkMode = useCallback(() => {
+    setWalkModeRequested(true);
+  }, []);
+
+  const clearWalkModeRequest = useCallback(() => {
+    setWalkModeRequested(false);
+  }, []);
 
   const addElement = useCallback((elementType) => {
     const newElement = {
@@ -162,6 +171,9 @@ export const SceneProvider = ({ children }) => {
     setSceneColors,
     panelMask,
     setPanelMask,
+    walkModeRequested,
+    requestWalkMode,
+    clearWalkModeRequest,
     addElement,
     updateElement,
     deleteElement,
