@@ -43,47 +43,108 @@ function Element3D({ element, isSelected, onSelect }) {
   const getGeometry = () => {
     switch (element.type) {
       case ELEMENT_TYPES.PERSON:
-        // More realistic person model
+        // Realistic person model with proper anatomy
         return (
           <group>
             {/* Head */}
-            <mesh position={[0, size.height * 0.9, 0]}>
-              <sphereGeometry args={[size.width * 0.35, 16, 16]} />
+            <mesh position={[0, size.height * 0.92, 0]}>
+              <sphereGeometry args={[size.width * 0.3, 16, 16]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
+
             {/* Neck */}
-            <mesh position={[0, size.height * 0.82, 0]}>
-              <cylinderGeometry args={[size.width * 0.15, size.width * 0.15, size.height * 0.08, 8]} />
+            <mesh position={[0, size.height * 0.85, 0]}>
+              <cylinderGeometry args={[size.width * 0.13, size.width * 0.15, size.height * 0.06, 8]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Torso (upper body) */}
-            <mesh position={[0, size.height * 0.6, 0]}>
-              <boxGeometry args={[size.width * 0.9, size.height * 0.35, size.depth * 0.5]} />
+
+            {/* Upper Torso (chest) */}
+            <mesh position={[0, size.height * 0.7, 0]}>
+              <boxGeometry args={[size.width * 0.85, size.height * 0.25, size.depth * 0.45]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Hips/Waist */}
-            <mesh position={[0, size.height * 0.4, 0]}>
-              <boxGeometry args={[size.width * 0.85, size.height * 0.15, size.depth * 0.45]} />
+
+            {/* Lower Torso (abdomen) */}
+            <mesh position={[0, size.height * 0.52, 0]}>
+              <boxGeometry args={[size.width * 0.8, size.height * 0.15, size.depth * 0.4]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Left Leg */}
-            <mesh position={[-size.width * 0.2, size.height * 0.2, 0]}>
-              <cylinderGeometry args={[size.width * 0.15, size.width * 0.15, size.height * 0.4, 8]} />
+
+            {/* Hips */}
+            <mesh position={[0, size.height * 0.42, 0]}>
+              <boxGeometry args={[size.width * 0.85, size.height * 0.12, size.depth * 0.45]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Right Leg */}
-            <mesh position={[size.width * 0.2, size.height * 0.2, 0]}>
-              <cylinderGeometry args={[size.width * 0.15, size.width * 0.15, size.height * 0.4, 8]} />
+
+            {/* Left Upper Leg */}
+            <mesh position={[-size.width * 0.22, size.height * 0.25, 0]}>
+              <cylinderGeometry args={[size.width * 0.14, size.width * 0.13, size.height * 0.22, 12]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Left Arm */}
-            <mesh position={[-size.width * 0.55, size.height * 0.6, 0]} rotation={[0, 0, Math.PI / 6]}>
-              <cylinderGeometry args={[size.width * 0.12, size.width * 0.12, size.height * 0.35, 8]} />
+
+            {/* Left Lower Leg */}
+            <mesh position={[-size.width * 0.22, size.height * 0.1, 0]}>
+              <cylinderGeometry args={[size.width * 0.11, size.width * 0.09, size.height * 0.2, 12]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
-            {/* Right Arm */}
-            <mesh position={[size.width * 0.55, size.height * 0.6, 0]} rotation={[0, 0, -Math.PI / 6]}>
-              <cylinderGeometry args={[size.width * 0.12, size.width * 0.12, size.height * 0.35, 8]} />
+
+            {/* Right Upper Leg */}
+            <mesh position={[size.width * 0.22, size.height * 0.25, 0]}>
+              <cylinderGeometry args={[size.width * 0.14, size.width * 0.13, size.height * 0.22, 12]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Right Lower Leg */}
+            <mesh position={[size.width * 0.22, size.height * 0.1, 0]}>
+              <cylinderGeometry args={[size.width * 0.11, size.width * 0.09, size.height * 0.2, 12]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Left Shoulder */}
+            <mesh position={[-size.width * 0.45, size.height * 0.78, 0]}>
+              <sphereGeometry args={[size.width * 0.12, 12, 12]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Left Upper Arm */}
+            <mesh position={[-size.width * 0.45, size.height * 0.63, 0]} rotation={[0, 0, Math.PI / 12]}>
+              <cylinderGeometry args={[size.width * 0.11, size.width * 0.1, size.height * 0.2, 10]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Left Elbow */}
+            <mesh position={[-size.width * 0.47, size.height * 0.52, 0]}>
+              <sphereGeometry args={[size.width * 0.09, 10, 10]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Left Forearm */}
+            <mesh position={[-size.width * 0.47, size.height * 0.4, 0]} rotation={[0, 0, Math.PI / 24]}>
+              <cylinderGeometry args={[size.width * 0.09, size.width * 0.08, size.height * 0.18, 10]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Right Shoulder */}
+            <mesh position={[size.width * 0.45, size.height * 0.78, 0]}>
+              <sphereGeometry args={[size.width * 0.12, 12, 12]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Right Upper Arm */}
+            <mesh position={[size.width * 0.45, size.height * 0.63, 0]} rotation={[0, 0, -Math.PI / 12]}>
+              <cylinderGeometry args={[size.width * 0.11, size.width * 0.1, size.height * 0.2, 10]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Right Elbow */}
+            <mesh position={[size.width * 0.47, size.height * 0.52, 0]}>
+              <sphereGeometry args={[size.width * 0.09, 10, 10]} />
+              <meshStandardMaterial {...getMaterialProps(element.color)} />
+            </mesh>
+
+            {/* Right Forearm */}
+            <mesh position={[size.width * 0.47, size.height * 0.4, 0]} rotation={[0, 0, -Math.PI / 24]}>
+              <cylinderGeometry args={[size.width * 0.09, size.width * 0.08, size.height * 0.18, 10]} />
               <meshStandardMaterial {...getMaterialProps(element.color)} />
             </mesh>
           </group>
