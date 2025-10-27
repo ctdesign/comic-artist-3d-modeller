@@ -202,6 +202,20 @@ function PropertiesPanel({ viewMode }) {
       updateElement(selected.id, {
         rotation: { ...selected.rotation, [axis]: (value * Math.PI) / 180 },
       });
+    } else if (category === 'dimension') {
+      // Convert dimension to scale
+      const elementInfo = ELEMENT_DEFAULTS[selected.type];
+      const size = elementInfo.defaultSize;
+      const scaleAxis = axis; // width->x, height->y, depth->z
+      const axisMap = { width: 'x', height: 'y', depth: 'z' };
+      const scaleKey = axisMap[axis];
+      const defaultSize = size[axis];
+      const newScale = value / defaultSize;
+      const signedScale = newScale * Math.sign(selected.scale[scaleKey]);
+
+      updateElement(selected.id, {
+        scale: { ...selected.scale, [scaleKey]: signedScale },
+      });
     }
 
     setEditingField(null);
@@ -293,27 +307,12 @@ function PropertiesPanel({ viewMode }) {
         </button>
       </div>
 
-      {/* Dimensions - Read-only calculated values */}
+      {/* Dimensions - Editable */}
       <div className="mb-4 bg-gray-800 rounded p-3">
-        <h4 className="text-sm font-semibold mb-2">Dimensions (read-only)</h4>
-        <div className="flex items-center justify-between py-1">
-          <span className="text-xs text-gray-400">Width:</span>
-          <span className="text-xs font-mono text-gray-300 px-2 py-1">
-            {actualWidth.toFixed(2)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between py-1">
-          <span className="text-xs text-gray-400">Height:</span>
-          <span className="text-xs font-mono text-gray-300 px-2 py-1">
-            {actualHeight.toFixed(2)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between py-1">
-          <span className="text-xs text-gray-400">Depth:</span>
-          <span className="text-xs font-mono text-gray-300 px-2 py-1">
-            {actualDepth.toFixed(2)}
-          </span>
-        </div>
+        <h4 className="text-sm font-semibold mb-2">Dimensions</h4>
+        <PropertyField label="Width" value={actualWidth} field="dimension.width" decimals={2} />
+        <PropertyField label="Height" value={actualHeight} field="dimension.height" decimals={2} />
+        <PropertyField label="Depth" value={actualDepth} field="dimension.depth" decimals={2} />
       </div>
 
       {/* Position */}

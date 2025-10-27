@@ -37,13 +37,14 @@ function AppContent() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setToolMode('select')}
-                    className={`px-3 py-1.5 rounded text-sm ${
+                    className={`px-3 py-1.5 rounded text-sm flex items-center gap-1 ${
                       toolMode === 'select'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                   >
-                    Select
+                    <span>↖</span>
+                    <span>Select</span>
                   </button>
                   <button
                     onClick={() => setToolMode('wall')}
@@ -53,17 +54,7 @@ function AppContent() {
                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                     }`}
                   >
-                    Wall
-                  </button>
-                  <button
-                    onClick={() => setToolMode('scale')}
-                    className={`px-3 py-1.5 rounded text-sm ${
-                      toolMode === 'scale'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    Scale
+                    Wall Builder
                   </button>
                 </div>
 
@@ -82,24 +73,24 @@ function AppContent() {
 
           {/* Right side with view mode and actions */}
           <div className="flex items-center gap-4">
-            {/* View Mode Toggle */}
-            <div className="flex gap-2">
+            {/* View Mode Tabs */}
+            <div className="flex bg-gray-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('2d')}
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded-md transition-colors ${
                   viewMode === '2d'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-300 hover:text-white'
                 }`}
               >
                 2D Builder
               </button>
               <button
                 onClick={() => setViewMode('3d')}
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded-md transition-colors ${
                   viewMode === '3d'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-300 hover:text-white'
                 }`}
               >
                 3D View
