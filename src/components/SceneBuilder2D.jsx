@@ -25,7 +25,6 @@ function SceneBuilder2D() {
   const [scaleHandle, setScaleHandle] = useState(null); // 'nw', 'ne', 'sw', 'se'
   const [scaleMode, setScaleMode] = useState('uniform'); // 'uniform' or 'skew'
   const [hoverHandle, setHoverHandle] = useState(null);
-  const [initialScale, setInitialScale] = useState(null); // Store initial scale when starting resize
 
   // Snap to grid helper
   const snapValue = (value) => {
@@ -347,7 +346,6 @@ function SceneBuilder2D() {
           setScaleHandle(handle);
           setIsDragging(true);
           setDragStart({ x: mouseX, y: mouseY });
-          setInitialScale({ x: element.scale.x, y: element.scale.y, z: element.scale.z });
           return;
         }
       }
@@ -446,8 +444,8 @@ function SceneBuilder2D() {
       return;
     }
 
-    if (scaleHandle && selectedElement && initialScale) {
-      // Scale mode
+    if (scaleHandle && selectedElement) {
+      // Scale mode - incremental based on mouse movement speed
       const element = elements.find((el) => el.id === selectedElement);
       if (element) {
         const elementInfo = ELEMENT_DEFAULTS[element.type];
@@ -457,7 +455,7 @@ function SceneBuilder2D() {
         const dy = mouseY - dragStart.y;
 
         if (scaleMode === 'uniform') {
-          // Uniform scaling based on total drag distance
+          // Uniform scaling based on mouse movement
           // Determine the correct direction based on which corner handle is being dragged
           let dragDirection = 1;
           if (scaleHandle === 'se') {
@@ -471,37 +469,39 @@ function SceneBuilder2D() {
           }
 
           const dragDistance = Math.sqrt(dx * dx + dy * dy);
-          const scaleFactor = 1 + (dragDistance / zoom / 10) * Math.sign(dragDirection);
-          const newScale = Math.max(0.1, Math.abs(initialScale.x) * scaleFactor);
+          const scaleDelta = (dragDistance / zoom) * Math.sign(dragDirection) * 0.02;
+          const newScale = Math.max(0.1, Math.abs(element.scale.x) + scaleDelta);
 
           updateElement(element.id, {
             scale: {
-              x: newScale * Math.sign(initialScale.x),
-              y: initialScale.y,
-              z: newScale * Math.sign(initialScale.z)
+              x: newScale * Math.sign(element.scale.x),
+              y: element.scale.y,
+              z: newScale * Math.sign(element.scale.z)
             },
           });
         } else {
-          // Skew scaling based on total drag from initial position
-          let newScaleX = initialScale.x;
-          let newScaleZ = initialScale.z;
+          // Skew scaling based on mouse movement
+          let newScaleX = element.scale.x;
+          let newScaleZ = element.scale.z;
 
           if (scaleHandle.includes('e')) {
-            newScaleX = Math.max(0.1, Math.abs(initialScale.x) + dx / zoom / size.width) * Math.sign(initialScale.x);
+            newScaleX = Math.max(0.1, Math.abs(element.scale.x) + dx / zoom * 0.02) * Math.sign(element.scale.x);
           } else if (scaleHandle.includes('w')) {
-            newScaleX = Math.max(0.1, Math.abs(initialScale.x) - dx / zoom / size.width) * Math.sign(initialScale.x);
+            newScaleX = Math.max(0.1, Math.abs(element.scale.x) - dx / zoom * 0.02) * Math.sign(element.scale.x);
           }
 
           if (scaleHandle.includes('s')) {
-            newScaleZ = Math.max(0.1, Math.abs(initialScale.z) + dy / zoom / size.depth) * Math.sign(initialScale.z);
+            newScaleZ = Math.max(0.1, Math.abs(element.scale.z) + dy / zoom * 0.02) * Math.sign(element.scale.z);
           } else if (scaleHandle.includes('n')) {
-            newScaleZ = Math.max(0.1, Math.abs(initialScale.z) - dy / zoom / size.depth) * Math.sign(initialScale.z);
+            newScaleZ = Math.max(0.1, Math.abs(element.scale.z) - dy / zoom * 0.02) * Math.sign(element.scale.z);
           }
 
           updateElement(element.id, {
-            scale: { x: newScaleX, y: initialScale.y, z: newScaleZ },
+            scale: { x: newScaleX, y: element.scale.y, z: newScaleZ },
           });
         }
+
+        setDragStart({ x: mouseX, y: mouseY });
       }
       return;
     }
@@ -545,7 +545,6 @@ function SceneBuilder2D() {
 
     setIsDragging(false);
     setScaleHandle(null);
-    setInitialScale(null);
   };
 
   const handleWheel = (e) => {
