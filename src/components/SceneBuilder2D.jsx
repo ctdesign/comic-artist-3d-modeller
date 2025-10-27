@@ -445,7 +445,7 @@ function SceneBuilder2D() {
     }
 
     if (scaleHandle && selectedElement) {
-      // Scale mode - incremental based on mouse movement speed
+      // Scale mode - directional resize with fixed opposite corner
       const element = elements.find((el) => el.id === selectedElement);
       if (element) {
         const elementInfo = ELEMENT_DEFAULTS[element.type];
@@ -454,51 +454,49 @@ function SceneBuilder2D() {
         const dx = mouseX - dragStart.x;
         const dy = mouseY - dragStart.y;
 
-        if (scaleMode === 'uniform') {
-          // Uniform scaling based on mouse movement
-          // Determine the correct direction based on which corner handle is being dragged
-          let scaleDelta = 0;
-          if (scaleHandle === 'se') {
-            scaleDelta = (dx + dy) / 2; // Both positive = grow
-          } else if (scaleHandle === 'nw') {
-            scaleDelta = -(dx + dy) / 2; // Both negative = grow
-          } else if (scaleHandle === 'ne') {
-            scaleDelta = (dx - dy) / 2; // dx positive, dy negative = grow
-          } else if (scaleHandle === 'sw') {
-            scaleDelta = (-dx + dy) / 2; // dx negative, dy positive = grow
-          }
+        // Calculate old dimensions
+        const oldWidth = size.width * Math.abs(element.scale.x);
+        const oldDepth = size.depth * Math.abs(element.scale.z);
 
-          const scaleChange = scaleDelta / zoom * 2.0;
-          const newScale = Math.max(0.1, Math.abs(element.scale.x) + scaleChange);
+        // Determine anchor corner (opposite of drag handle) in local space
+        let anchorX = 0, anchorZ = 0;
+        if (scaleHandle.includes('e')) anchorX = -1; // Dragging east, anchor west
+        if (scaleHandle.includes('w')) anchorX = 1;  // Dragging west, anchor east
+        if (scaleHandle.includes('s')) anchorZ = -1; // Dragging south, anchor north
+        if (scaleHandle.includes('n')) anchorZ = 1;  // Dragging north, anchor south
 
-          updateElement(element.id, {
-            scale: {
-              x: newScale * Math.sign(element.scale.x),
-              y: element.scale.y,
-              z: newScale * Math.sign(element.scale.z)
-            },
-          });
-        } else {
-          // Skew scaling based on mouse movement
-          let newScaleX = element.scale.x;
-          let newScaleZ = element.scale.z;
+        // Calculate anchor position in world space (before scaling)
+        const anchorWorldX = element.position.x + (anchorX * oldWidth / 2);
+        const anchorWorldZ = element.position.z + (anchorZ * oldDepth / 2);
 
-          if (scaleHandle.includes('e')) {
-            newScaleX = Math.max(0.1, Math.abs(element.scale.x) + dx / zoom * 2.0) * Math.sign(element.scale.x);
-          } else if (scaleHandle.includes('w')) {
-            newScaleX = Math.max(0.1, Math.abs(element.scale.x) - dx / zoom * 2.0) * Math.sign(element.scale.x);
-          }
+        // Calculate new scale
+        let newScaleX = element.scale.x;
+        let newScaleZ = element.scale.z;
 
-          if (scaleHandle.includes('s')) {
-            newScaleZ = Math.max(0.1, Math.abs(element.scale.z) + dy / zoom * 2.0) * Math.sign(element.scale.z);
-          } else if (scaleHandle.includes('n')) {
-            newScaleZ = Math.max(0.1, Math.abs(element.scale.z) - dy / zoom * 2.0) * Math.sign(element.scale.z);
-          }
-
-          updateElement(element.id, {
-            scale: { x: newScaleX, y: element.scale.y, z: newScaleZ },
-          });
+        if (scaleHandle.includes('e')) {
+          newScaleX = Math.max(0.1, Math.abs(element.scale.x) + dx / zoom * 2.0) * Math.sign(element.scale.x);
+        } else if (scaleHandle.includes('w')) {
+          newScaleX = Math.max(0.1, Math.abs(element.scale.x) - dx / zoom * 2.0) * Math.sign(element.scale.x);
         }
+
+        if (scaleHandle.includes('s')) {
+          newScaleZ = Math.max(0.1, Math.abs(element.scale.z) + dy / zoom * 2.0) * Math.sign(element.scale.z);
+        } else if (scaleHandle.includes('n')) {
+          newScaleZ = Math.max(0.1, Math.abs(element.scale.z) - dy / zoom * 2.0) * Math.sign(element.scale.z);
+        }
+
+        // Calculate new dimensions
+        const newWidth = size.width * Math.abs(newScaleX);
+        const newDepth = size.depth * Math.abs(newScaleZ);
+
+        // Calculate new position so anchor corner stays fixed
+        const newPosX = anchorWorldX - (anchorX * newWidth / 2);
+        const newPosZ = anchorWorldZ - (anchorZ * newDepth / 2);
+
+        updateElement(element.id, {
+          scale: { x: newScaleX, y: element.scale.y, z: newScaleZ },
+          position: { x: newPosX, y: element.position.y, z: newPosZ },
+        });
 
         setDragStart({ x: mouseX, y: mouseY });
       }
